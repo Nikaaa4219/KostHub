@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// google_fonts not needed in splash (image contains wordmark)
 import 'login_screen.dart';
-import '../widgets/safe_asset_image.dart';
+// import '../widgets/safe_asset_image.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -32,22 +32,13 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Logo
-              SafeAssetImage(
-                'assets/images/logo.png',
-                width: 72,
-                height: 72,
-                circle: true,
-                semanticLabel: 'KostHub logo',
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'KostHub',
-                style: GoogleFonts.playfairDisplay(
-                  color: const Color(0xFF5D5CFF),
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                ),
+              // Brand image (logo + wordmark)
+              Image.asset(
+                'assets/images/PNG-KostHub/Logo_SplashScreen.png',
+                width: 180,
+                height: 180,
+                // circle: false,
+                semanticLabel: 'KostHub brand',
               ),
             ],
           ),

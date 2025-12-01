@@ -3,6 +3,7 @@ import 'home_screen.dart';
 import 'search_screen.dart';
 import 'profile_screen.dart';
 import 'saved_screen.dart';
+import 'history_screen.dart';
 
 /// MainShell: hosts the main app pages inside a PageView and a single
 /// BottomNavigationBar so switching tabs is smooth and the bottom bar
@@ -55,9 +56,8 @@ class _MainShellState extends State<MainShell> {
           child: const Text('Open Search'),
         ),
       ),
-      const Center(
-        child: Text('History', style: TextStyle(color: Colors.white)),
-      ),
+      // History tab shows persisted bookings
+      const HistoryScreen(),
       const ProfileScreen(),
     ]);
   }

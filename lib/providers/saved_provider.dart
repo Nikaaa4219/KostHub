@@ -44,4 +44,7 @@ class SavedProvider extends ChangeNotifier {
       // ignore
     }
   }
+
+  /// Backwards-compatible alias that some callers expect.
+  Future<void> toggleSaved(String id) async => toggleSave(id);
 }

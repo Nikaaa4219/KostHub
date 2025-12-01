@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../utils/payment_utils.dart';
+import '../models/booking_record.dart';
 
 class NotificationProvider extends ChangeNotifier {
   int _unreadCount = 0;
@@ -32,10 +32,26 @@ class NotificationProvider extends ChangeNotifier {
     _unreadCount += 1;
     await _persist();
     notifyListeners();
-    // Keep a debug log so the event is visible during development.
-    // Note: integrate `flutter_local_notifications` (or another platform plugin)
-    // to trigger real local notifications in the future when needed.
     debugPrint('Payment notification added: ${record.id}');
+  }
+
+  /// Simpler generic API used by ATM flow: adds a short notification entry.
+  Future<void> addNotification(String title, String body) async {
+    try {
+      final map = {
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'title': title,
+        'body': body,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+      _items.insert(0, map);
+      _unreadCount += 1;
+      await _persist();
+      notifyListeners();
+      debugPrint('Notification added: $title');
+    } catch (e) {
+      debugPrint('Failed to add notification: $e');
+    }
   }
 
   Future<void> loadNotifications() async {
@@ -43,7 +59,8 @@ class NotificationProvider extends ChangeNotifier {
       final sp = await SharedPreferences.getInstance();
       final raw = sp.getString(kNotificationsKey);
       if (raw == null || raw.isEmpty) return;
-      final List<dynamic> list = jsonDecode(raw) as List<dynamic>;
+      // Parse JSON in a background isolate to avoid blocking the UI thread.
+      final List<dynamic> list = await compute(_decodeJsonList, raw);
       _items.clear();
       for (final e in list) {
         _items.add(Map<String, dynamic>.from(e as Map));
@@ -59,4 +76,10 @@ class NotificationProvider extends ChangeNotifier {
     _unreadCount = 0;
     notifyListeners();
   }
+}
+
+// Top-level helper for compute() — must be a top-level function (not a
+// class instance method) so it can be run in a background isolate.
+List<dynamic> _decodeJsonList(String raw) {
+  return jsonDecode(raw) as List<dynamic>;
 }

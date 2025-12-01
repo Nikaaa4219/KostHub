@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../utils/payment_utils.dart';
+import '../models/booking_record.dart';
 
 class HistoryProvider extends ChangeNotifier {
   static const _kKey = kHistoryKey;
@@ -20,7 +20,8 @@ class HistoryProvider extends ChangeNotifier {
       final sp = await SharedPreferences.getInstance();
       final raw = sp.getString(_kKey);
       if (raw == null || raw.isEmpty) return;
-      final List<dynamic> list = jsonDecode(raw) as List<dynamic>;
+      // Parse JSON in a background isolate to avoid blocking the UI thread.
+      final List<dynamic> list = await compute(_parseJsonList, raw);
       _history.clear();
       for (final e in list) {
         _history.add(
@@ -33,6 +34,9 @@ class HistoryProvider extends ChangeNotifier {
     }
   }
 
+  // NOTE: compute() requires a top-level or static function. The actual
+  // implementation lives at file-level below the class.
+
   Future<void> addBooking(BookingRecord record) async {
     try {
       _history.insert(0, record);
@@ -44,4 +48,13 @@ class HistoryProvider extends ChangeNotifier {
       debugPrint('Failed to persist booking: $e');
     }
   }
+
+  /// Alias for the newer naming used in payment flow.
+  Future<void> addPayment(BookingRecord record) async => addBooking(record);
+}
+
+// Top-level helper for compute() — must be a top-level function (not a
+// class instance method) so it can be run in a background isolate.
+List<dynamic> _parseJsonList(String raw) {
+  return jsonDecode(raw) as List<dynamic>;
 }

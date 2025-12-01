@@ -26,6 +26,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<NotificationProvider>();
+    final items = provider.items;
+
     return Scaffold(
       body: Container(
         color: const Color(0xFF5D5CFF),
@@ -62,15 +65,78 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               Expanded(
                 child: Container(
                   color: const Color(0xFF1A1A1A), // Match the dark theme
-                  child: Center(
-                    child: Text(
-                      'No notifications yet',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                  child: items.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No notifications yet',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          itemCount: items.length,
+                          separatorBuilder: (_, __) =>
+                              const Divider(color: Colors.white12),
+                          itemBuilder: (ctx, i) {
+                            final it = items[i];
+                            final isBooking =
+                                it.containsKey('roomId') ||
+                                it.containsKey('invoiceId');
+                            final title =
+                                (it['title'] ??
+                                        (isBooking
+                                            ? 'Booking confirmed'
+                                            : 'Notification'))
+                                    as String;
+                            final body =
+                                (it['body'] ??
+                                        (isBooking
+                                            ? 'You have a new booking'
+                                            : ''))
+                                    as String;
+                            final tsRaw = it['timestamp'] as String?;
+                            final ts = tsRaw != null
+                                ? DateTime.tryParse(tsRaw)
+                                : null;
+                            return ListTile(
+                              tileColor: const Color(0xFF0E0F12),
+                              title: Text(
+                                title,
+                                style: GoogleFonts.inter(color: Colors.white),
+                              ),
+                              subtitle: Text(
+                                '$body${ts != null ? ' • ${ts.toLocal().toIso8601String().split('T').first}' : ''}',
+                                style: GoogleFonts.inter(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              onTap: () {
+                                // Show a dialog; closing it should keep the user on
+                                // the Notifications screen (no further navigation).
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: Text(title),
+                                    content: Text(body),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          // Only close the dialog and remain on
+                                          // the Notifications screen as requested.
+                                          Navigator.of(ctx).pop();
+                                        },
+                                        child: const Text('Close'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
                 ),
               ),
             ],
