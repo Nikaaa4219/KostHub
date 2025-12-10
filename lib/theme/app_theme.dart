@@ -52,21 +52,21 @@ class AppTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Color(0xFF1F2130)),
+          borderSide: const BorderSide(color: Color(0xFF1F2130)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Color(0xFF1F2130)),
+          borderSide: const BorderSide(color: Color(0xFF1F2130)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: _primary),
+          borderSide: const BorderSide(color: _primary),
         ),
         hintStyle: GoogleFonts.inter(fontSize: 14, color: Colors.white70),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFF2A2B33),
+          backgroundColor: const Color(0xFF2A2B33),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -74,7 +74,7 @@ class AppTheme {
           minimumSize: const Size.fromHeight(52),
         ),
       ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: _surface,
         selectedItemColor: _primary,
         unselectedItemColor: Colors.white70,

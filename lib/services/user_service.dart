@@ -37,7 +37,7 @@ class UserService {
 
     final uri = Uri.parse(updateEndpoint);
     // Try to include Authorization header if token is stored in secure storage.
-    final storage = const FlutterSecureStorageAdapter();
+    const storage = FlutterSecureStorageAdapter();
     String? token;
     try {
       final s = await storage.read(UserService._storageKey);
@@ -82,7 +82,7 @@ class UserService {
 
     // If an endpoint is configured, attempt a GET with Authorization header.
     final uri = Uri.parse(updateEndpoint);
-    final storage = const FlutterSecureStorageAdapter();
+    const storage = FlutterSecureStorageAdapter();
     String? saved;
     try {
       saved = await storage.read(_storageKey);

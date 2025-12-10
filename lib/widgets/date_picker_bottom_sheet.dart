@@ -161,7 +161,7 @@ class _MonthPickerContentState extends State<_MonthPickerContent> {
                 const SizedBox(height: 8),
                 Text(
                   formatter.format(_viewDate),
-                  style: TextStyle(color: Colors.white70),
+                  style: const TextStyle(color: Colors.white70),
                 ),
                 const SizedBox(height: 8),
                 Expanded(
@@ -169,12 +169,12 @@ class _MonthPickerContentState extends State<_MonthPickerContent> {
                     controller: controller,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 7,
-                          childAspectRatio: 1.1,
-                        ),
+                      crossAxisCount: 7,
+                      childAspectRatio: 1.1,
+                    ),
                     itemCount:
                         DateTime(_viewDate.year, _viewDate.month + 1, 0).day +
-                        7, // simple grid including weekday headers
+                            7, // simple grid including weekday headers
                     itemBuilder: (ctx, idx) {
                       // idx 0..6 show weekday short labels
                       if (idx < 7) {
@@ -190,7 +190,7 @@ class _MonthPickerContentState extends State<_MonthPickerContent> {
                         return Center(
                           child: Text(
                             labels[idx],
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
                             ),
@@ -215,9 +215,8 @@ class _MonthPickerContentState extends State<_MonthPickerContent> {
                         child: Container(
                           margin: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: selected
-                                ? primaryAccent
-                                : Colors.transparent,
+                            color:
+                                selected ? primaryAccent : Colors.transparent,
                             shape: BoxShape.circle,
                           ),
                           child: Center(

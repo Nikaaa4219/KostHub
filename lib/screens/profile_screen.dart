@@ -70,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Semantics(
                   label: 'Profile image',
-                  child: SafeAssetImage(
+                  child: const SafeAssetImage(
                     'assets/images/profile.jpg',
                     width: 72,
                     height: 72,
@@ -88,8 +88,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           : 'John Doe';
                       final displayEmail =
                           (user != null && user.email.isNotEmpty)
-                          ? user.email
-                          : 'john.doe@example.com';
+                              ? user.email
+                              : 'john.doe@example.com';
 
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -108,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             displayEmail,
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              color: Color(0xFFB9B9C9),
+                              color: const Color(0xFFB9B9C9),
                             ),
                           ),
                         ],
@@ -121,12 +121,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onPressed: () async {
                     // buka EditProfileScreen dan tunggu hasil
                     final messenger = ScaffoldMessenger.of(context);
-                    final res = await Navigator.of(context)
-                        .push<Map<String, dynamic>>(
-                          MaterialPageRoute(
-                            builder: (_) => const EditProfileScreen(),
-                          ),
-                        );
+                    final res =
+                        await Navigator.of(context).push<Map<String, dynamic>>(
+                      MaterialPageRoute(
+                        builder: (_) => const EditProfileScreen(),
+                      ),
+                    );
                     if (!mounted) {
                       return;
                     }

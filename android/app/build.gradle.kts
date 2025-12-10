@@ -3,6 +3,9 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    
+    // -- PERBAIKAN: Plugin Google Services (Tanpa version, tanpa apply false) --
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -11,12 +14,12 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "1.8"
     }
 
     defaultConfig {
@@ -41,4 +44,13 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // -- PERBAIKAN: Menambahkan Firebase Dependencies --
+    // 1. Firebase BoM (Bill of Materials) - Versi terbaru
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+
+    // 2. Firebase Analytics (Disarankan)
+    implementation("com.google.firebase:firebase-analytics")
 }

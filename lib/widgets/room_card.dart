@@ -44,7 +44,7 @@ class RoomCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.star,
                       size: 14,
                       color: Color(0xFFFFD166),
@@ -63,7 +63,7 @@ class RoomCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.location_on_outlined,
                       size: 14,
                       color: Colors.white70,

@@ -13,7 +13,7 @@ class SecureStorageService {
 
   // singleton accessor
   static SecureStorageService get instance {
-    _instance ??= SecureStorageService._(const FlutterSecureStorage());
+    _instance ??= const SecureStorageService._(FlutterSecureStorage());
     return _instance!;
   }
 

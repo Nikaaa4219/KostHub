@@ -26,8 +26,8 @@ class PaymentPopup extends StatelessWidget {
                 Container(
                   width: 80,
                   height: 80,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF5D5CFF),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF5D5CFF),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(color: Colors.white24, blurRadius: 8),
@@ -64,7 +64,7 @@ class PaymentPopup extends StatelessWidget {
                 Container(
                   width: 80,
                   height: 80,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),

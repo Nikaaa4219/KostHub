@@ -81,8 +81,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _pickDate() async {
-    DateTime initDate =
-        _parseDate(_dobCtrl.text) ??
+    DateTime initDate = _parseDate(_dobCtrl.text) ??
         DateTime.now().subtract(const Duration(days: 365 * 20));
     final res = await showDatePicker(
       context: context,
@@ -249,7 +248,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       },
                       child: Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: _kPrimary,
                           shape: BoxShape.circle,
                         ),

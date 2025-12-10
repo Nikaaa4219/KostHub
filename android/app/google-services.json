@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "145577418452",
+    "project_id": "kosthub-32b76",
+    "storage_bucket": "kosthub-32b76.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:145577418452:android:0c9044e2fadf06a85fe541",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "145577418452-1ja924n1mi8mielugdaarrkee9l6mor5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flutter_application_2",
+            "certificate_hash": "ac30a28469f546d05dca9f3e9fa3a58d27386e1d"
+          }
+        },
+        {
+          "client_id": "145577418452-g4m7u5p5f2hkkgb42s0b63qhtfug4rfm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVkJrvJGdm6iCd_xJ1T_J07UbWd7vXUg0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "145577418452-g4m7u5p5f2hkkgb42s0b63qhtfug4rfm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

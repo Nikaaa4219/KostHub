@@ -25,7 +25,7 @@ class Room {
   });
 }
 
-// DATA DUMMY DENGAN KOORDINAT YANG ANDA PILIH
+// DATA DUMMY DENGAN KOORDINAT SPESIFIK PILIHAN ANDA
 final List<Room> sampleRooms = [
   Room(
     id: 'r1',
@@ -35,7 +35,7 @@ final List<Room> sampleRooms = [
     rating: 4.8,
     reviews: 128,
     assetImage: 'assets/images/PNG-KostHub/Hotel4.png',
-    // Koordinat Pilihan Anda:
+    // Lokasi Pilihan Anda (Jakarta):
     latitude: -6.223742,
     longitude: 106.833859,
   ),
@@ -47,7 +47,7 @@ final List<Room> sampleRooms = [
     rating: 4.5,
     reviews: 89,
     assetImage: 'assets/images/PNG-KostHub/Hotel1.png',
-    // Koordinat Pilihan Anda:
+    // Lokasi Pilihan Anda (Bandung):
     latitude: -6.923422359105052,
     longitude: 107.62363656178339,
   ),
@@ -59,7 +59,7 @@ final List<Room> sampleRooms = [
     rating: 4.9,
     reviews: 210,
     assetImage: 'assets/images/PNG-KostHub/Hotel2.png',
-    // Koordinat Pilihan Anda:
+    // Lokasi Pilihan Anda (Bali):
     latitude: -8.813409282913042,
     longitude: 115.21102137660674,
   ),
@@ -71,7 +71,7 @@ final List<Room> sampleRooms = [
     rating: 4.2,
     reviews: 45,
     assetImage: 'assets/images/PNG-KostHub/Hotel3.png',
-    // Koordinat Pilihan Anda:
+    // Lokasi Pilihan Anda (Yogyakarta):
     latitude: -7.773812987646052,
     longitude: 110.36847798544744,
   ),

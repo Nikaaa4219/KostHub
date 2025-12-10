@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// no extra imports
 import 'dart:async';
+import 'package:firebase_core/firebase_core.dart'; // Import Firebase
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -22,19 +22,22 @@ import 'providers/notification_provider.dart';
 import 'providers/history_provider.dart';
 
 Future<void> main() async {
+  // Wajib ada agar Firebase bisa jalan sebelum UI muncul
   WidgetsFlutterBinding.ensureInitialized();
-  // Run the app immediately and perform expensive initialization in a
-  // short-lived BootLoader widget so the engine/UI is not blocked and
-  // we avoid a black screen on cold start (especially on Android).
+
+  // -- INISIALISASI FIREBASE --
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint("Firebase init failed: $e");
+  }
+  // ---------------------------
+
   runApp(
     const MaterialApp(home: BootLoader(), debugShowCheckedModeBanner: false),
   );
 }
 
-/// BootLoader shows a lightweight splash while performing async
-/// initialization (loading saved auth, saved rooms, history, notifications).
-/// When initialization completes it replaces itself with the real app
-/// that receives the preloaded provider instances.
 class BootLoader extends StatefulWidget {
   const BootLoader({super.key});
 
@@ -69,10 +72,6 @@ class _BootLoaderState extends State<BootLoader> {
       await notificationProvider.loadNotifications();
 
       if (!mounted) return;
-      // Replace BootLoader with the full app configured with loaded providers.
-      // Safe because we just checked mounted; suppress lint about using
-      // BuildContext across async gaps here.
-      // ignore: use_build_context_synchronously
       final navigator = Navigator.of(context);
       navigator.pushReplacement(
         MaterialPageRoute(
@@ -85,44 +84,20 @@ class _BootLoaderState extends State<BootLoader> {
         ),
       );
     } catch (e, st) {
-      // If initialization fails, still continue to app with empty/default
-      // providers so the user can see the UI and we can surface errors.
       debugPrint('BootLoader init failed: $e\n$st');
       if (!mounted) return;
-      try {
-        final authProvider = await AuthProvider.loadSavedAuth();
-        // Safe because we just checked mounted; suppress lint about using
-        // BuildContext across async gaps here.
-        // ignore: use_build_context_synchronously
-        final navigator = Navigator.of(context);
-        navigator.pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => KostHubApp(
-              authProvider: authProvider,
-              savedProvider: SavedProvider(),
-              historyProvider: HistoryProvider(),
-              notificationProvider: NotificationProvider(),
-            ),
+      final authProvider2 = await AuthProvider.loadSavedAuth();
+      // ignore: use_build_context_synchronously
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => KostHubApp(
+            authProvider: authProvider2,
+            savedProvider: SavedProvider(),
+            historyProvider: HistoryProvider(),
+            notificationProvider: NotificationProvider(),
           ),
-        );
-      } catch (e2) {
-        // Last resort: start app with fresh providers (user will be logged out)
-        final authProvider2 = await AuthProvider.loadSavedAuth();
-        // Safe because we just checked mounted; suppress lint about using
-        // BuildContext across async gaps here.
-        // ignore: use_build_context_synchronously
-        final navigator = Navigator.of(context);
-        navigator.pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => KostHubApp(
-              authProvider: authProvider2,
-              savedProvider: SavedProvider(),
-              historyProvider: HistoryProvider(),
-              notificationProvider: NotificationProvider(),
-            ),
-          ),
-        );
-      }
+        ),
+      );
     }
   }
 
@@ -169,13 +144,9 @@ class KostHubApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => RoomProvider()),
-        // Provide the already-initialized AuthProvider instance
         ChangeNotifierProvider.value(value: authProvider),
-        // preloaded notification provider
         ChangeNotifierProvider.value(value: notificationProvider),
-        // use preloaded savedProvider to ensure initial state is available
         ChangeNotifierProvider.value(value: savedProvider),
-        // preloaded history provider
         ChangeNotifierProvider.value(value: historyProvider),
       ],
       child: MaterialApp(

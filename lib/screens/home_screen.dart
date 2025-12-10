@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
               child: Row(
                 children: [
-                  SafeAssetImage(
+                  const SafeAssetImage(
                     'assets/images/logo.png',
                     width: 40,
                     height: 40,
@@ -80,8 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   label: '$count unread notifications',
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF5D5CFF),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF5D5CFF),
                                       shape: BoxShape.circle,
                                     ),
                                     constraints: const BoxConstraints(
