@@ -1,108 +1,104 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'secure_storage_service.dart';
-
-// -- FIREBASE IMPORTS --
+import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:d_session/d_session.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import '../models/account.dart';
 
-class LoginResult {
-  final Map<String, dynamic> user;
-  final String token;
-
-  LoginResult({required this.user, required this.token});
-}
-
-class AuthService {
-  AuthService._privateConstructor();
-  static final AuthService instance = AuthService._privateConstructor();
-
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-
-  /// FUNGSI BARU: Login menggunakan Akun Google
-  Future<LoginResult?> loginWithGoogle() async {
+class AuthSource {
+  // === REGISTER / SIGN UP ===
+  // === API CALL ===
+  // Berkomunikasi dengan Firebase Auth untuk membuat kredensial baru
+  static Future<String> signUp(
+      String name, String email, String password) async {
     try {
-      // 1. Pemicu Popup Google di HP User
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null; // Batal
-
-      // 2. Ambil token otentikasi dari akun Google
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // 3. Buat kredensial untuk dikirim ke Firebase
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      // 4. Masuk ke Firebase menggunakan kredensial tersebut
-      final UserCredential userCredential =
-          await _firebaseAuth.signInWithCredential(credential);
+      final account = Account(
+        uid: credential.user!.uid,
+        name: name,
+        email: email,
+        phoneNumber: '',
+        kycStatus: 'UNVERIFIED',
+      );
 
-      final User? firebaseUser = userCredential.user;
+      await FirebaseFirestore.instance
+          .collection('User')
+          .doc(account.uid)
+          .set(account.toJson());
 
-      if (firebaseUser != null) {
-        // 5. Sukses! Ambil data user
-        final token = await firebaseUser.getIdToken() ?? 'firebase_token';
-
-        // Ambil nama & foto asli dari akun Google
-        final userMap = {
-          'email': firebaseUser.email ?? '',
-          'name': firebaseUser.displayName ?? 'User',
-          'photoUrl': firebaseUser.photoURL,
-        };
-
-        // Simpan ke storage lokal agar aplikasi tahu kita sudah login
-        await SecureStorageService.instance.write('auth_token', token);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_user_v1', jsonEncode(userMap));
-
-        return LoginResult(user: userMap, token: token);
+      return 'success';
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        return 'Kata sandi yang diberikan terlalu lemah.';
+      } else if (e.code == 'email-already-in-use') {
+        return 'Akun untuk email tersebut sudah terdaftar.';
       }
-      return null;
+      log(e.toString());
+      return "Terjadi kesalahan saat mendaftar. Silakan coba lagi.";
     } catch (e) {
-      debugPrint("Google Sign-In Error: $e");
-      return null;
+      log(e.toString());
+      return "Terjadi kesalahan yang tidak diketahui.";
     }
   }
 
-  /// Login Manual (Tetap ada sebagai cadangan)
-  Future<LoginResult?> login(String email, String password) async {
+  // === LOGIN ===
+  // === API CALL ===
+  // Memverifikasi kredensial user melalui Firebase Auth
+  static Future<String> signIn(String email, String password) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 700));
-      if (email.contains('@') && password.length >= 6) {
-        final token = 'token_dummy_${email.hashCode}';
-        final user = {'email': email, 'name': email.split('@').first};
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-        await SecureStorageService.instance.write('auth_token', token);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_user_v1', jsonEncode(user));
-        return LoginResult(user: user, token: token);
+      final accountDoc = await FirebaseFirestore.instance
+          .collection('User')
+          .doc(credential.user!.uid)
+          .get();
+
+      if (accountDoc.exists) {
+        Map<String, dynamic> data = accountDoc.data()!;
+
+        if (data['verifiedAt'] != null && data['verifiedAt'] is Timestamp) {
+          data['verifiedAt'] =
+              (data['verifiedAt'] as Timestamp).toDate().toIso8601String();
+        }
+
+        await DSession.setUser(data);
+        return "success";
+      } else {
+        return "Data pengguna tidak ditemukan di database.";
       }
-      return null;
-    } catch (_) {
-      return null;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        return 'Tidak ada pengguna yang ditemukan dengan email tersebut.';
+      } else if (e.code == 'wrong-password') {
+        return 'Kata sandi yang Anda masukkan salah.';
+      } else if (e.code == 'invalid-credential') {
+        return 'Kredensial yang diberikan salah atau telah kedaluwarsa.';
+      }
+      log(e.toString());
+      return "Terjadi kesalahan saat masuk. Silakan coba lagi.";
+    } catch (e) {
+      log(e.toString());
+      return "Terjadi kesalahan yang tidak diketahui.";
     }
   }
 
-  /// Logout: Keluar dari Firebase & Google
-  Future<void> logout() async {
+  // === LOGOUT ===
+  // === API CALL ===
+  // Menghapus sesi kredensial Firebase dan lokal secara permanen
+  static Future<void> signOut() async {
     try {
-      await _firebaseAuth.signOut();
-      await _googleSignIn.signOut();
-
-      await SecureStorageService.instance.delete('auth_token');
-      await SecureStorageService.instance.deleteAll();
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('auth_user_v1');
-    } catch (_) {}
-  }
-
-  Future<String?> getToken() async {
-    return await SecureStorageService.instance.read('auth_token');
+      await FirebaseAuth.instance.signOut();
+      await DSession.removeUser();
+    } catch (e) {
+      log(e.toString());
+      throw Exception("Gagal keluar dari akun.");
+    }
   }
 }

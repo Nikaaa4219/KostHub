@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import 'receipt_screen.dart'; // Pastikan file ini sudah ada!
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -91,6 +92,7 @@ class HistoryScreen extends StatelessWidget {
                     itemCount: docs.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (ctx, i) {
+                      // Ambil data lengkap dari Firestore
                       final data = docs[i].data() as Map<String, dynamic>;
 
                       final String roomName =
@@ -100,9 +102,8 @@ class HistoryScreen extends StatelessWidget {
                       final String startDate = data['startDate'];
                       final String endDate = data['endDate'];
                       final String orderId = data['orderId'] ?? '-';
-                      final String paymentMethod =
-                          data['paymentMethod'] ?? 'Midtrans';
 
+                      // Tentukan Warna Status
                       Color statusColor = Colors.orange;
                       if (status == 'SUCCESS') statusColor = Colors.green;
                       if (status == 'FAILED') statusColor = Colors.red;
@@ -115,11 +116,11 @@ class HistoryScreen extends StatelessWidget {
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.all(12),
+                          // Icon Hotel
                           leading: Container(
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              // PERBAIKAN 1: withOpacity -> withValues
                               color: const Color(0xFF5D5CFF)
                                   .withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(8),
@@ -127,6 +128,7 @@ class HistoryScreen extends StatelessWidget {
                             child: const Icon(Icons.hotel,
                                 color: Color(0xFF5D5CFF)),
                           ),
+                          // Judul & Badge Status
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -143,7 +145,6 @@ class HistoryScreen extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  // PERBAIKAN 2: withOpacity -> withValues
                                   color: statusColor.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -157,6 +158,7 @@ class HistoryScreen extends StatelessWidget {
                               ),
                             ],
                           ),
+                          // Detail Tanggal & Harga
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Column(
@@ -183,43 +185,13 @@ class HistoryScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+                          // AKSI SAAT DITEKAN: Buka ReceiptScreen
                           onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                backgroundColor: const Color(0xFF1F2029),
-                                title: Text("Detail Pesanan",
-                                    style: GoogleFonts.playfairDisplay(
-                                        color: Colors.white)),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text("Hotel: $roomName",
-                                        style: const TextStyle(
-                                            color: Colors.white70)),
-                                    Text("Total: ${formatCurrency(total)}",
-                                        style: const TextStyle(
-                                            color: Colors.white70)),
-                                    Text("Status: $status",
-                                        style: TextStyle(
-                                            color: statusColor,
-                                            fontWeight: FontWeight.bold)),
-                                    const SizedBox(height: 10),
-                                    const Text("Metode Pembayaran:",
-                                        style:
-                                            TextStyle(color: Colors.white70)),
-                                    Text(paymentMethod,
-                                        style: const TextStyle(
-                                            color: Colors.white)),
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(ctx),
-                                    child: const Text("Tutup"),
-                                  )
-                                ],
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                // Kirim seluruh data booking ke ReceiptScreen
+                                builder: (context) => ReceiptScreen(data: data),
                               ),
                             );
                           },

@@ -7,31 +7,15 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_2/main.dart';
-import 'package:flutter_application_2/providers/auth_provider.dart';
-import 'package:flutter_application_2/providers/saved_provider.dart';
-import 'package:flutter_application_2/providers/history_provider.dart';
-import 'package:flutter_application_2/providers/notification_provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame. Load authProvider before building app.
-    final authProvider = await AuthProvider.loadSavedAuth();
-    final savedProvider = SavedProvider();
-    await savedProvider.loadSaved();
-    final historyProvider = HistoryProvider();
-    await historyProvider.loadHistory();
-    final notificationProvider = NotificationProvider();
-    await notificationProvider.loadNotifications();
-    await tester.pumpWidget(
-      KostHubApp(
-        authProvider: authProvider,
-        savedProvider: savedProvider,
-        historyProvider: historyProvider,
-        notificationProvider: notificationProvider,
-      ),
-    );
+  testWidgets('KostHubApp initialization smoke test',
+      (WidgetTester tester) async {
+    // KostHubApp yang baru sudah mandiri, tidak perlu lagi disuapi parameter provider
+    // dari luar. Kita cukup memanggilnya secara langsung.
+    await tester.pumpWidget(const KostHubApp());
 
-    // Verify that KostHub title/text is present on splash/login.
-    expect(find.text('KostHub'), findsWidgets);
+    // Memverifikasi bahwa layar loading awal (BootLoader) muncul dengan teks yang sesuai
+    expect(find.text('Starting system...'), findsOneWidget);
   });
 }

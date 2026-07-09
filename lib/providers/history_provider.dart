@@ -1,10 +1,7 @@
-// Auto-generated per user prompt — manual review required
 import 'dart:collection';
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../models/booking_record.dart';
 
 class HistoryProvider extends ChangeNotifier {
@@ -20,7 +17,6 @@ class HistoryProvider extends ChangeNotifier {
       final sp = await SharedPreferences.getInstance();
       final raw = sp.getString(_kKey);
       if (raw == null || raw.isEmpty) return;
-      // Parse JSON in a background isolate to avoid blocking the UI thread.
       final List<dynamic> list = await compute(_parseJsonList, raw);
       _history.clear();
       for (final e in list) {

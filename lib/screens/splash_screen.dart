@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-// google_fonts not needed in splash (image contains wordmark)
-import 'login_screen.dart';
-// import '../widgets/safe_asset_image.dart';
+// import 'login_screen.dart'; // <--- INI DIHAPUS
+
+// --- IMPORT HALAMAN LOGIN BARU KITA ---
+import 'signin_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,7 +20,10 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(const Duration(milliseconds: 1200), () {
       Navigator.of(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+      ).pushReplacement(
+        // --- UBAH TUJUAN KE SigninPage() ---
+        MaterialPageRoute(builder: (_) => const SigninPage()),
+      );
     });
   }
 

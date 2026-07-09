@@ -1,9 +1,7 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Reusable payment result popup used by the ATM/manual flow.
 class PaymentPopup extends StatelessWidget {
   final bool success;
   final String? message;
@@ -12,102 +10,71 @@ class PaymentPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = success ? const Color(0xFF5D5CFF) : Colors.redAccent;
+    final icon = success ? Icons.check : Icons.close;
+    final title = success ? 'Payment Successful' : 'Payment Failed';
+
     return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
       child: Dialog(
-        backgroundColor: const Color(0xFF0E0F12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: const Color(0xFF1F2029),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (success) ...[
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF5D5CFF),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(color: Colors.white24, blurRadius: 8),
-                    ],
-                  ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 44),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Payment Received Successfully',
-                  style: GoogleFonts.playfairDisplay(
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Congratulations 🎉 Your booking has been confirmed',
-                  style: GoogleFonts.inter(color: Colors.white70),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    key: const Key('payment_success_back_home'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Back to Home'),
-                  ),
-                ),
-              ] else ...[
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.close, color: Colors.white, size: 44),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Payment Failed',
-                  style: GoogleFonts.playfairDisplay(
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  message ?? 'Please enter the correct amount',
-                  style: GoogleFonts.inter(color: Colors.white70),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        key: const Key('payment_fail_try_again'),
-                        onPressed: () {
-                          Navigator.of(context).pop('retry');
-                        },
-                        child: const Text('Try Again'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop('back');
-                        },
-                        child: const Text('Back'),
-                      ),
+              // GLOWING ICON
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.4),
+                      blurRadius: 20,
+                      spreadRadius: 2,
                     ),
                   ],
                 ),
-              ],
+                child: Icon(icon, color: color, size: 40),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                title,
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                message ??
+                    (success
+                        ? 'Thank you for your booking!'
+                        : 'Please try again.'),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: color,
+                    shadowColor: color.withValues(alpha: 0.5),
+                    elevation: 10,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Close",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
             ],
           ),
         ),

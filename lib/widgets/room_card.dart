@@ -5,103 +5,121 @@ import 'safe_asset_image.dart';
 
 class RoomCard extends StatelessWidget {
   final Room room;
-  final bool compact; // compact = for vertical list
+  final bool compact; // True = List Vertical, False = List Horizontal
   const RoomCard({super.key, required this.room, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
-    final card = Container(
+    return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
+        // Efek Mewah: Border tipis + Shadow lembut
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.05),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          SafeAssetImage(
-            room.assetImage,
-            width: compact ? 100 : 140,
-            height: compact ? 80 : 110,
-            fit: BoxFit.cover,
-            semanticLabel: '${room.name} image',
-            borderRadius: BorderRadius.circular(12),
+          // Gambar Hotel
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              bottomLeft: Radius.circular(16),
+            ),
+            child: SafeAssetImage(
+              room.assetImage,
+              width: compact ? 100 : 130,
+              height: compact ? 90 : 110,
+              fit: BoxFit.cover,
+            ),
           ),
           const SizedBox(width: 12),
+          // Informasi Hotel
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  room.name,
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    room.name,
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.star,
-                      size: 14,
-                      color: Color(0xFFFFD166),
-                      semanticLabel: 'rating star',
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${room.rating} (${room.reviews})',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_outlined,
-                      size: 14,
-                      color: Colors.white70,
-                      semanticLabel: 'location',
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        room.location,
+                  const SizedBox(height: 4),
+                  // Rating Star
+                  Row(
+                    children: [
+                      const Icon(Icons.star,
+                          size: 14, color: Color(0xFFFFD166)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${room.rating} (${room.reviews} reviews)',
                         style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: Colors.white70,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                            fontSize: 11, color: Colors.white54),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '\$${room.price.toStringAsFixed(0)}/night',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  // Lokasi
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on,
+                          size: 14, color: Color(0xFF5D5CFF)),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          room.location,
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.white70),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Harga (Formatted)
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '\$${room.price.toStringAsFixed(0)}',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF5D5CFF), // Warna Aksen
+                          ),
+                        ),
+                        TextSpan(
+                          text: '/night',
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.white38),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
-      child: card,
     );
   }
 }

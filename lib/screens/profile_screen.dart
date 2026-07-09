@@ -1,14 +1,17 @@
 // File: lib/screens/profile_screen.dart
-// Deskripsi: Layar profil pengguna. Terhubung ke AuthService (stub) dan EditProfileScreen.
-// Bergantung pada: lib/screens/edit_profile_screen.dart, lib/services/auth_service.dart, lib/widgets/safe_asset_image.dart
+// Deskripsi: Layar profil pengguna. Terhubung ke AuthSource (Firebase).
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
 import 'edit_profile_screen.dart';
 import '../widgets/safe_asset_image.dart';
-import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+
 import '../services/auth_service.dart';
+import '../common/info.dart';
+import '../models/user.dart'; // Import model User
 
 const _kBackground = Color(0xFF0B0C10);
 const _kPrimary = Color(0xFF5D5CFF);
@@ -23,30 +26,28 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  // --- FUNGSI LOGOUT YANG SUDAH TERHUBUNG KE FIREBASE ---
   Future<void> _performLogout() async {
-    // Capture context-dependent objects before awaiting to satisfy the
-    // linter rule about using BuildContext across async gaps.
-    final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
-    AuthProvider? authProv;
     try {
-      authProv = context.read<AuthProvider>();
-    } catch (_) {}
+      Info.showLoading(context, message: 'Keluar dari akun...');
 
-    try {
-      await AuthService.instance.logout();
+      await AuthSource.signOut();
+
+      // Hapus sesi lokal di Provider agar benar-benar bersih
+      if (mounted) {
+        await context.read<AuthProvider>().setUser(User(name: '', email: ''));
+      }
+
+      Info.hideLoading();
+
       if (!mounted) return;
 
-      // clear provider if we captured it earlier
-      try {
-        if (authProv != null) await authProv.clearUser();
-      } catch (_) {}
-
-      messenger.showSnackBar(const SnackBar(content: Text('Logout berhasil')));
-      navigator.pushReplacementNamed('/login');
+      Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
+      Info.success('Berhasil keluar dari akun.');
     } catch (e) {
+      Info.hideLoading();
       if (mounted) {
-        messenger.showSnackBar(SnackBar(content: Text('Logout gagal: $e')));
+        Info.error('Logout gagal: $e');
       }
     }
   }
@@ -57,94 +58,92 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: _kBackground,
       body: Column(
         children: [
-          // Header - match HomeScreen dimensions to avoid visual jump when
-          // navigating between Home and Profile. Use same height and padding
-          // and keep a flat bottom (no rounded corners) so the app doesn't
-          // appear to resize/slide.
+          // --- HEADER PROFILE DENGAN SAFEAREA (RESPONSIVE) ---
           Container(
-            height: 110,
             color: _kPrimary,
-            padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Semantics(
-                  label: 'Profile image',
-                  child: const SafeAssetImage(
-                    'assets/images/profile.jpg',
-                    width: 72,
-                    height: 72,
-                    circle: true,
-                    semanticLabel: 'Profile image',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Builder(
-                    builder: (ctx) {
-                      final user = ctx.watch<AuthProvider>().user;
-                      final displayName = (user != null && user.name.isNotEmpty)
-                          ? user.name
-                          : 'John Doe';
-                      final displayEmail =
-                          (user != null && user.email.isNotEmpty)
-                              ? user.email
-                              : 'john.doe@example.com';
-
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            displayName,
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            displayEmail,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: const Color(0xFFB9B9C9),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: Colors.white),
-                  onPressed: () async {
-                    // buka EditProfileScreen dan tunggu hasil
-                    final messenger = ScaffoldMessenger.of(context);
-                    final res =
-                        await Navigator.of(context).push<Map<String, dynamic>>(
-                      MaterialPageRoute(
-                        builder: (_) => const EditProfileScreen(),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Semantics(
+                      label: 'Profile image',
+                      child: const SafeAssetImage(
+                        'assets/images/profile.jpg',
+                        width: 72,
+                        height: 72,
+                        circle: true,
+                        semanticLabel: 'Profile image',
                       ),
-                    );
-                    if (!mounted) {
-                      return;
-                    }
-                    if (res != null) {
-                      // Updated profile returned; update provider/UI as needed (see TODOs.md)
-                      messenger.showSnackBar(
-                        const SnackBar(
-                          content: Text('Profile diperbarui (lokal)'),
-                        ),
-                      );
-                    }
-                  },
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Builder(
+                        builder: (ctx) {
+                          final user = ctx.watch<AuthProvider>().user;
+
+                          // Mengambil nama dan email yang sebenarnya
+                          final displayName = user?.name ?? 'Memuat...';
+                          final displayEmail = user?.email ?? '';
+
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                displayName,
+                                style: GoogleFonts.inter(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                displayEmail,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: const Color(0xFFB9B9C9),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon:
+                          const Icon(Icons.edit_outlined, color: Colors.white),
+                      onPressed: () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        final res = await Navigator.of(context)
+                            .push<Map<String, dynamic>>(
+                          MaterialPageRoute(
+                            builder: (_) => const EditProfileScreen(),
+                          ),
+                        );
+                        if (!mounted) {
+                          return;
+                        }
+                        if (res != null) {
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content: Text('Profile diperbarui (lokal)'),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
 
-          // Content
+          // --- Content ---
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -198,9 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     );
                   },
                 ),
-                // divider between bookings and privacy as requested
                 const Divider(color: _kSurfaceDivider),
-                // Dark Mode setting removed - theme handled at app level
                 _buildTile(
                   Icons.privacy_tip,
                   'Privacy Policy',
@@ -224,7 +221,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     );
                   },
                 ),
-
                 const SizedBox(height: 24),
                 SizedBox(
                   height: 52,
@@ -248,9 +244,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      // Bottom navigation is provided by MainShell when the app runs inside
-      // the shell. When the user wants to jump to a tab we navigate to the
-      // shell and select the appropriate index so the transition is smooth.
     );
   }
 
@@ -272,6 +265,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
-// NOTE: logout already calls AuthService.logout() stub and clears AuthProvider when available.
-// Remove this comment once real backend/logout flow is integrated.
