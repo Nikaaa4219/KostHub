@@ -4,14 +4,20 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/booking_record.dart';
 
+// === Manajemen State Riwayat Pemesanan ===
+
 class HistoryProvider extends ChangeNotifier {
   static const _kKey = kHistoryKey;
 
   final List<BookingRecord> _history = [];
 
+  // === Enkapsulasi Data ===
+  // Mencegah komponen UI (Layar) memanipulasi data riwayat secara ilegal/langsung tanpa melalui fungsi resmi di Provider ini.
   UnmodifiableListView<BookingRecord> get history =>
       UnmodifiableListView(_history);
 
+  // === Parsing JSON dengan Isolate ===
+  // Mencegah aplikasi menjadi 'lag', patah-patah, atau 'freeze'
   Future<void> loadHistory() async {
     try {
       final sp = await SharedPreferences.getInstance();
@@ -30,9 +36,8 @@ class HistoryProvider extends ChangeNotifier {
     }
   }
 
-  // NOTE: compute() requires a top-level or static function. The actual
-  // implementation lives at file-level below the class.
-
+  // === Riwayat & Persistensi ===
+  // Memasukkan transaksi yang baru berhasil dibayar ke dalam daftar dan menyimpannya secara permanen ke penyimpanan lokal.
   Future<void> addBooking(BookingRecord record) async {
     try {
       _history.insert(0, record);
@@ -45,12 +50,11 @@ class HistoryProvider extends ChangeNotifier {
     }
   }
 
-  /// Alias for the newer naming used in payment flow.
   Future<void> addPayment(BookingRecord record) async => addBooking(record);
 }
 
-// Top-level helper for compute() — must be a top-level function (not a
-// class instance method) so it can be run in a background isolate.
+// === Background Task Parser ===
+// Fungsi murni (Top-Level Function) yang berdiri sendiri secara statis
 List<dynamic> _parseJsonList(String raw) {
   return jsonDecode(raw) as List<dynamic>;
 }
